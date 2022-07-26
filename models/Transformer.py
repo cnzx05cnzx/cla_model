@@ -20,8 +20,8 @@ class Config(object):
 
         self.embedding_pretrained = torch.tensor(np.load('./utils/' + embedding)["embeddings"].astype(
             'float32')) if embedding != 'random' else None  # 预训练词向量
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # 设备
-        # self.device = torch.device('cpu')  # 设备
+        # self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # 设备
+        self.device = torch.device('cpu')  # 设备
 
         self.seed = 721
         self.dropout = 0.5  # 随机失活
@@ -60,9 +60,9 @@ class Model(nn.Module):
             # Encoder(config.dim_model, config.num_head, config.hidden, config.dropout)
             for _ in range(config.num_encoder)])
 
-        self.fc1 = nn.Linear(config.max_len * config.dim_model, config.num_classes)
-        # self.fc2 = nn.Linear(config.last_hidden, config.num_classes)
-        # self.fc1 = nn.Linear(config.dim_model, config.num_classes)
+        self.linear = nn.Linear(config.max_len * config.dim_model, config.num_classes)
+
+        self.dropouts = nn.ModuleList([nn.Dropout(config.dropout) for _ in range(3)])
 
     def forward(self, x):
         out = self.embedding(x)
@@ -71,8 +71,17 @@ class Model(nn.Module):
             out = encoder(out)
         out = out.view(out.size(0), -1)
         # out = torch.mean(out, 1)
-        out = self.fc1(out)
-        return out
+        for i, dropout in enumerate(self.dropouts):
+            if i == 0:
+                res = dropout(out)
+                res = self.linear(res)
+            else:
+                temp_out = dropout(out)
+                res = res + self.linear(temp_out)
+        return res
+
+        # out = self.linear(out)
+        # return out
 
 
 class Encoder(nn.Module):

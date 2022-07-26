@@ -57,6 +57,7 @@ class Model(nn.Module):
             nn.Linear(128, config.num_classes)
         )
 
+
     def conv_and_pool(self, x, conv):
         x = F.relu(conv(x)).squeeze(3)
         x = F.max_pool1d(x, x.size(2)).squeeze(2)

@@ -8,7 +8,7 @@ import argparse
 from data_load import get_dataloader
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, default='Transformer', required=False, help='choose a model')
+parser.add_argument('--model', type=str, default='TextCNN', required=False, help='choose a model')
 parser.add_argument('--embedding', default='SougouNews.npz', type=str, help='random or other')
 # parser.add_argument('--embedding', default='random', type=str, help='random or other')
 args = parser.parse_args()
@@ -39,7 +39,7 @@ def one_model():
     test(config, model, testl)
 
 
-def many_model():
+def many_model(type):
     name_lists = ['TextCNN', 'TextRNN', 'Transformer']
 
     choose = list(import_module('models.' + model_name) for model_name in name_lists)
@@ -52,9 +52,9 @@ def many_model():
     trainl, devl, testl, vocab_size = get_dataloader(configs[0])
 
     model = list(choo.Model(config).to(config.device) for choo, config in zip(choose, configs))
-    mul_test(configs[0], model, name_lists, testl, 'mean')
+    mul_test(configs[0], model, name_lists, testl, type)
 
 
 if __name__ == '__main__':
-    one_model()
-    # many_model()
+    # one_model()
+    many_model('vote')

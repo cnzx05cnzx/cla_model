@@ -52,6 +52,8 @@ class Model(nn.Module):
             # nn.Linear(32, config.num_classes)
         )
 
+        self.dropouts = nn.ModuleList([nn.Dropout(config.dropout) for _ in range(3)])
+
     def forward(self, x):
         # 初始输入格式为(length, batch_size)
         out = self.embedding(x)
@@ -61,7 +63,16 @@ class Model(nn.Module):
 
         out, (h, c) = self.lstm(out)
         out = torch.cat((h[-2, :, :], h[-1, :, :]), dim=1)
+
+        # multi-sample dropout 不一定有效
+        # for i, dropout in enumerate(self.dropouts):
+        #     if i == 0:
+        #         res = dropout(out)
+        #         res = self.linear(res)
+        #     else:
+        #         temp_out = dropout(out)
+        #         res = res + self.linear(temp_out)
+        # return res
+
         out = self.linear(out)
-        # print(out.shape)
-        # print(out)
         return out
