@@ -27,7 +27,7 @@ class Config(object):
         self.dropout = 0.5  # 随机失活
         self.early_stop = 10  # 早停机制
         self.num_classes = 5  # 类别数
-        self.vocab_size = 0  # 词表大小，在运行时赋值
+        self.vocab_size = 652  # 词表大小，在运行时赋值
         self.num_epochs = 100  # epoch数
         self.batch_size = 32  # batch大小
         self.max_len = 40  # 每句话处理成的长度(短填长切)

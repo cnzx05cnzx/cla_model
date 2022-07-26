@@ -19,14 +19,14 @@ class Config(object):
 
         self.embedding_pretrained = torch.tensor(np.load('./utils/' + embedding)["embeddings"].astype(
             'float32')) if embedding != 'random' else None  # 预训练词向量
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # 设备
-        # self.device = torch.device('cpu')  # 设备
+        # self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # 设备
+        self.device = torch.device('cpu')  # 设备
 
         self.seed = 721
         self.dropout = 0.5  # 随机失活
         self.early_stop = 10  # 早停机制
         self.num_classes = 5  # 类别数
-        self.vocab_size = 0  # 词表大小，在运行时赋值
+        self.vocab_size = 652  # 词表大小，在运行时赋值
         self.num_epochs = 100  # epoch数
         self.batch_size = 32  # batch大小
         self.max_len = 40  # 每句话处理成的长度(短填长切)
@@ -63,4 +63,5 @@ class Model(nn.Module):
         out = torch.cat((h[-2, :, :], h[-1, :, :]), dim=1)
         out = self.linear(out)
         # print(out.shape)
+        # print(out)
         return out
