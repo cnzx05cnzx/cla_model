@@ -1,4 +1,6 @@
 from collections import Counter
+
+from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 import torch
 import numpy as np
@@ -51,9 +53,9 @@ def get_dataloader(config):
 
     max_len = config.max_len
 
-    def tokenizer(name):
+    def tokenizer(df):
         inputs = []
-        sentence_char = [[j for j in i] for i in data[name]]
+        sentence_char = [[j for j in i[0]] for step, i in df.iterrows()]
         # 将输入文本进行padding
         for index, i in enumerate(sentence_char):
             temp = [char2idx.get(j, unk_id) for j in i]
@@ -63,17 +65,16 @@ def get_dataloader(config):
             else:
                 temp = temp[:max_len]
             inputs.append(temp)
+
         return inputs
 
     # 针对只有整个数据集的处理
-    DataSet = TextCNNDataSet(tokenizer('cut'), list(data["pos"]))
-    train_size = int(len(list(data["pos"])) * 0.6)
-    test_size = len(list(data["pos"])) - train_size
-    train_dataset, test_dataset = torch.utils.data.random_split(DataSet, [train_size, test_size])
+    x_train, x_test, y_train, y_test = train_test_split(data['cut'], data['pos'], test_size=0.2, random_state=721)
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2, random_state=721)
 
-    test_size = int(len(list(test_dataset)) * 0.5)
-    valid_size = int(len(list(test_dataset))) - test_size
-    valid_dataset, test_dataset = torch.utils.data.random_split(test_dataset, [valid_size, test_size])
+    train_dataset = TextCNNDataSet(tokenizer(x_train), list(y_train))
+    valid_dataset = TextCNNDataSet(tokenizer(x_valid), list(y_valid))
+    test_dataset = TextCNNDataSet(tokenizer(x_test), list(y_test))
 
     batch_size = config.batch_size
     TrainLoader = DataLoader(train_dataset, batch_size, shuffle=True, drop_last=True)
